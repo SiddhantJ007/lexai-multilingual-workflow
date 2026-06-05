@@ -6,6 +6,16 @@ LexAi is a sanitized portfolio project that demonstrates an AI-assisted multilin
 
 I built LexAi to explore how a lightweight product experience could connect a frontend workflow to backend AI services for translation, rewriting, OCR-assisted intake, feedback collection, and output iteration.
 
+## Project Evolution
+
+LexAi started as a multilingual AI content workflow built around a real product need: helping users generate, translate, refine, and export content without manually moving between multiple tools. The early version included login and signup flows so user activity and usage could be tracked through accounts.
+
+After testing the workflow, the requirement changed: users were less likely to try the tool if they had to create an account first. I redesigned the flow to remove the login barrier while still keeping user sessions separated. The updated approach used browser-side session tracking so each browser session could keep its own usage state, history, and token limits without mixing data across users.
+
+The translation workflow also evolved through feedback. A “good” response could generate alternative variants, while a “bad” response asked for feedback and resent that context into the AI flow for regeneration. The goal was not just to translate text once, but to create an iterative content workflow where users could improve outputs, compare variants, reuse feedback, and export structured results.
+
+This public version keeps the core workflow and removes private branding, deployment details, credentials, and third-party business context. It is intended to show the product and engineering decisions behind the prototype: simplifying user access, preserving session isolation, building feedback loops, supporting OCR/file input, and making AI outputs easier to review and export.
+
 ## Key features
 
 - AI-assisted multilingual translation flow
@@ -120,3 +130,9 @@ This repo intentionally removes the original business website surface, login/sig
 - Replace prompt-based JSON parsing with stricter schema-based responses where appropriate
 - Add a proper local development config for frontend API base URLs
 - Add a small seed dataset or screenshots for portfolio presentation without requiring API keys
+
+## Running Notes
+
+The frontend is designed to run against the local FastAPI backend. The public repo does not include production deployment settings, API keys, or the original hosted environment. To test live AI calls, create a local `.env` file from `.env.example`, add valid API keys, start the backend with Uvicorn, and then serve the frontend locally.
+
+Without API keys, the frontend and backend code can still be reviewed to understand the workflow structure, request flow, prompt/regeneration logic, OCR path, feedback handling, and CSV export behavior.
