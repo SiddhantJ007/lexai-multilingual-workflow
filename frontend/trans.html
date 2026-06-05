@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LexAi | Translation Workflow Demo</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --panel:#ffffff;
+      --ink:#17212b;
+      --muted:#5e6a76;
+      --line:#dbe1ea;
+      --accent:#0f8b8d;
+      --accent-dark:#0b6466;
+      --warn:#c84c31;
+      --good:#2d8f5a;
+      --shadow:0 18px 50px rgba(23,33,43,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(15,139,141,.14), transparent 24%),
+        linear-gradient(180deg, #fbfbfd 0%, var(--bg) 100%);
+      font:16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a{color:inherit}
+    .shell{max-width:1180px;margin:0 auto;padding:26px 18px 72px}
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+      margin-bottom:22px;
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:-.04em;
+      text-decoration:none;
+      font-size:1.3rem;
+    }
+    .toplinks{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .toplinks a{
+      text-decoration:none;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.75);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:600;
+      color:var(--muted);
+    }
+    .hero{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:28px;
+      box-shadow:var(--shadow);
+    }
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3.2rem);
+      letter-spacing:-.05em;
+    }
+    .hero p{
+      margin:0;
+      max-width:780px;
+      color:var(--muted);
+      font-size:1rem;
+    }
+    .layout{
+      display:grid;
+      gap:18px;
+      margin-top:18px;
+    }
+    @media(min-width:980px){
+      .layout{grid-template-columns:1.3fr .9fr}
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+    .card h2{
+      margin:0 0 14px;
+      font-size:1.15rem;
+      letter-spacing:-.02em;
+    }
+    label{
+      display:block;
+      margin:14px 0 6px;
+      font-weight:700;
+      font-size:.92rem;
+    }
+    textarea, select, input[type="text"], input[type="file"]{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 15px;
+      background:#fbfcff;
+      color:var(--ink);
+      font:inherit;
+    }
+    textarea{min-height:180px;resize:vertical}
+    .row{
+      display:grid;
+      gap:12px;
+    }
+    @media(min-width:680px){
+      .row.two{grid-template-columns:repeat(2,1fr)}
+    }
+    .mode{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    .mode label{
+      margin:0;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 14px;
+      background:#fff;
+      font-weight:600;
+    }
+    .actions, .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+    button{
+      border:0;
+      border-radius:999px;
+      padding:12px 18px;
+      font:700 .94rem/1 system-ui, sans-serif;
+      cursor:pointer;
+      transition:transform .16s ease, box-shadow .16s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{background:var(--accent);color:#fff}
+    .secondary{background:#eef5f7;color:var(--accent-dark)}
+    .danger{background:#faede9;color:var(--warn)}
+    .ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .status{
+      margin-top:12px;
+      min-height:24px;
+      color:var(--muted);
+      font-size:.93rem;
+    }
+    .result{
+      display:none;
+      margin-top:18px;
+      padding:18px;
+      border-radius:18px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+    }
+    .result pre{
+      white-space:pre-wrap;
+      margin:0;
+      font:500 .97rem/1.65 system-ui, sans-serif;
+    }
+    .feedback{
+      display:none;
+      gap:10px;
+      margin-top:16px;
+      flex-wrap:wrap;
+    }
+    .feedback .good{background:#edf8f1;color:var(--good)}
+    .feedback .bad{background:#fcedea;color:var(--warn)}
+    .variants{
+      display:none;
+      margin-top:18px;
+    }
+    .variant-list{
+      list-style:none;
+      padding:0;
+      margin:10px 0 0;
+      display:grid;
+      gap:10px;
+    }
+    .variant-list li{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fbfcff;
+    }
+    .variant-actions{
+      display:flex;
+      gap:8px;
+      flex-shrink:0;
+    }
+    .variant-actions button{
+      padding:10px 12px;
+      border-radius:12px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.95rem;
+    }
+    th, td{
+      text-align:left;
+      padding:12px 10px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+    }
+    th{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .table-wrap{overflow:auto}
+    .hint{
+      color:var(--muted);
+      font-size:.92rem;
+      margin-top:8px;
+    }
+    .pill{
+      display:inline-block;
+      padding:7px 10px;
+      border-radius:999px;
+      background:#f1f5f9;
+      color:var(--muted);
+      font-size:.8rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar">
+      <a class="brand" href="index.html">LexAi</a>
+      <nav class="toplinks">
+        <a href="index.html">Portfolio Home</a>
+        <a href="emails-demo.html">Email Demo</a>
+        <a href="../README.md">README</a>
+      </nav>
+    </div>
+
+    <section class="hero">
+      <span class="pill">Translation Workflow</span>
+      <h1>Multilingual content demo</h1>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <h2>Run Workflow</h2>
+        <label for="prompt">Source content</label>
+        <textarea id="prompt" placeholder="Paste short-form content, product copy, or a marketing line."></textarea>
+
+        <div class="mode" role="radiogroup" aria-label="Workflow mode">
+          <label><input type="radio" name="mode" value="translate" checked> Translate</label>
+          <label><input type="radio" name="mode" value="rephrase"> Rewrite in English</label>
+        </div>
+
+        <div class="row two">
+          <div>
+            <label for="language">Target language</label>
+            <select id="language">
+              <option value="AR">Arabic</option>
+              <option value="BG">Bulgarian</option>
+              <option value="ZH">Chinese</option>
+              <option value="CS">Czech</option>
+              <option value="DA">Danish</option>
+              <option value="NL">Dutch</option>
+              <option value="EN">English</option>
+              <option value="ET">Estonian</option>
+              <option value="FI">Finnish</option>
+              <option value="FR">French</option>
+              <option value="DE">German</option>
+              <option value="EL">Greek</option>
+              <option value="HU">Hungarian</option>
+              <option value="ID">Indonesian</option>
+              <option value="IT">Italian</option>
+              <option value="JA">Japanese</option>
+              <option value="KO">Korean</option>
+              <option value="LV">Latvian</option>
+              <option value="LT">Lithuanian</option>
+              <option value="NB">Norwegian (Bokmål)</option>
+              <option value="PL">Polish</option>
+              <option value="PT">Portuguese</option>
+              <option value="RO">Romanian</option>
+              <option value="RU">Russian</option>
+              <option value="SK">Slovak</option>
+              <option value="SL">Slovenian</option>
+              <option value="ES" selected>Spanish</option>
+              <option value="SV">Swedish</option>
+              <option value="TR">Turkish</option>
+              <option value="UK">Ukrainian</option>
+            </select>
+          </div>
+          <div>
+            <label for="modelSelect">Model</label>
+            <select id="modelSelect">
+              <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4o">gpt-4o</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="fileInput">Optional OCR input</label>
+        <input id="fileInput" type="file" accept=".pdf,image/*">
+        <p class="hint">Upload a PDF or image to extract text into the source box before running the workflow.</p>
+
+        <div class="actions">
+          <button class="primary" id="runBtn" type="button">Run Workflow</button>
+          <button class="secondary" id="uploadBtn" type="button">Extract Text From File</button>
+          <button class="ghost" id="clearInputBtn" type="button">Clear Input</button>
+        </div>
+
+        <div class="status" id="formStatus"></div>
+
+        <section class="result" id="resultCard" aria-live="polite">
+          <h2 id="resultTitle">Output</h2>
+          <pre id="resultText"></pre>
+          <div class="actions">
+            <button class="primary" id="copyBtn" type="button">Copy Output</button>
+          </div>
+          <div class="feedback" id="feedbackControls">
+            <button class="good" id="goodBtn" type="button">Save As Good</button>
+            <button class="bad" id="badBtn" type="button">Critique And Regenerate</button>
+          </div>
+          <section class="variants" id="variantsSection">
+            <h2>Alternative Outputs</h2>
+            <p class="hint">Available after saving a good result.</p>
+            <ul class="variant-list" id="variantList"></ul>
+          </section>
+        </section>
+      </div>
+
+      <div class="card">
+        <h2>Saved Feedback</h2>
+        <p class="hint">
+          Feedback is stored locally in the backend SQLite file for demo purposes only. Export uses CSV.
+        </p>
+        <div class="toolbar">
+          <button class="secondary" id="refreshBtn" type="button">Refresh</button>
+          <button class="ghost" id="downloadBtn" type="button">Download CSV</button>
+          <button class="danger" id="clearFeedbackBtn" type="button">Clear History</button>
+        </div>
+        <div class="status" id="tableStatus"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Prompt</th>
+                <th>Language</th>
+                <th>Feedback</th>
+                <th>Output</th>
+              </tr>
+            </thead>
+            <tbody id="feedbackBody">
+              <tr><td colspan="5">No feedback saved yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
