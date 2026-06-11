@@ -76,6 +76,7 @@
     <section class="hero">
       <h1 style="text-align: center;">Outreach Generation Tool</h1>
       <p class="sub" style="text-align: center;">Drop your brief → get 5 skim-friendly emails in <b>AIDA</b>, <b>PAS</b>, <b>4U</b>, <b>STAR</b>, <b>IDCA</b> (50–125 words).</p>
+      <p id="backendStatus" class="sub" style="text-align:center;margin-top:0">Checking backend connection…</p>
 
       <div class="grid">
         <!-- Form -->
@@ -172,6 +173,7 @@
     </section>
   </div>
 
+  <script src="config.js"></script>
   <script>
     const API_BASE = (() => {
       if (window.LEXAI_API_BASE) return window.LEXAI_API_BASE.replace(/\/$/,'');
@@ -179,7 +181,7 @@
       if (location.protocol === "file:" || h === "localhost" || h === "127.0.0.1") {
         return "http://127.0.0.1:8000";
       }
-      return `${location.protocol}//${h}:8000`;
+      return "";
     })();
 
     const apiUrl = (p) => `${API_BASE.replace(/\/$/,'')}${p.startsWith('/')?p:'/'+p}`;
@@ -196,6 +198,7 @@
     const copyAllBtn = document.getElementById('copyAllBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const wcPill = document.getElementById('wcPill');
+    const backendStatus = document.getElementById('backendStatus');
 
     let current = []; // holds emails array from backend
     let activeMethod = null;
@@ -245,6 +248,9 @@
 }
 
       async function callAPI(body){
+    if (!API_BASE) {
+      throw new Error("Backend URL is not configured. Set window.LEXAI_API_BASE in frontend/config.js.");
+    }
     const url = apiUrl("/api/generate-emails");
     const resp = await fetch(url, {
       method:'POST',
@@ -386,6 +392,25 @@
         genBtn.disabled = false; genSpin.style.display='none';
       }
     });
+
+    async function checkBackend(){
+      if (!API_BASE) {
+        backendStatus.textContent = "Backend URL not configured. Set frontend/config.js before deploying the static frontend.";
+        return;
+      }
+      try{
+        const r = await fetch(`${API_BASE}/healthz`);
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        backendStatus.textContent = data.database_ok
+          ? "Backend connected."
+          : "Backend connected. Feedback storage is not fully ready yet.";
+      }catch(err){
+        backendStatus.textContent = `Backend unavailable: ${err.message}`;
+      }
+    }
+
+    checkBackend();
   </script>
 <script>
   const METHOD_DESCRIPTIONS = {

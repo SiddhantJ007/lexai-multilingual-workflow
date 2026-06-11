@@ -9,6 +9,12 @@ router = APIRouter(prefix="/api", tags=["emails"])
 
 # ---------- OpenAI client ----------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+ALLOWED_MODELS = {
+    model.strip()
+    for model in os.getenv("ALLOWED_MODELS", "gpt-4.1-mini,gpt-4o-mini,gpt-4o").split(",")
+    if model.strip()
+}
 
 # ---------- Types & Models ----------
 MethodName = Literal["AIDA", "PAS", "4U", "STAR", "IDCA"]
@@ -69,9 +75,13 @@ def _user_prompt(payload: GenerateRequest, restrict: Optional[MethodName]) -> st
     }
     return json.dumps(spec, ensure_ascii=False)
 
+
+def selected_model() -> str:
+    return DEFAULT_MODEL if DEFAULT_MODEL in ALLOWED_MODELS else sorted(ALLOWED_MODELS)[0]
+
 def _call_llm(payload: GenerateRequest, restrict: Optional[MethodName]) -> Dict:
     resp = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model=selected_model(),
         temperature=0.7,
         response_format={"type": "json_object"},
         messages=[
@@ -142,7 +152,7 @@ def _validate_and_fix(payload: GenerateRequest, data: Dict, restrict: Optional[M
         count = _word_count(body)
         if count < 50 or count > 125:
             fix = client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model=selected_model(),
                 temperature=0.3,
                 messages=[
                     {"role":"system","content":"Rewrite to 50–125 words, keep meaning & CTA intact, add concise line breaks. Return only the email body text."},

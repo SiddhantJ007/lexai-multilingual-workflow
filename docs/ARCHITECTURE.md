@@ -21,14 +21,15 @@ The backend centers on two files:
 Supporting utilities:
 
 - [`backend/app/utils.py`](../backend/app/utils.py): moderation helper for critique safety
-- [`backend/app/utils_pdf.py`](../backend/app/utils_pdf.py): PDF text extraction with OCR fallback
+- [`backend/app/utils_pdf.py`](../backend/app/utils_pdf.py): direct PDF text extraction for text-based PDFs
+- [`backend/app/db.py`](../backend/app/db.py): Postgres-compatible feedback persistence layer
 
 ## Request flow from UI to backend
 
 ### Translation workflow
 
 1. The user enters text or uploads a file in `trans.html`.
-2. `script.js` sends requests to the FastAPI backend at `http://127.0.0.1:8000` by default.
+2. `script.js` sends requests to the FastAPI backend through a runtime-configured backend URL.
 3. The backend refines the English source and returns either:
    - translated output from `/full-process/`
    - rewritten English output from `/rephrase/`
@@ -52,8 +53,8 @@ Supporting utilities:
 
 ### OCR flow
 
-- PDF uploads go through `utils_pdf.py`, which attempts direct text extraction and falls back to OCR for low-text pages.
-- Image uploads use Tesseract OCR through Pillow plus `pytesseract`.
+- Text-based PDFs are supported through direct extraction in `utils_pdf.py`.
+- Scanned PDFs and image OCR are intentionally not enabled in the Phase 1 Vercel deployment.
 
 ### Regeneration flow
 
@@ -70,6 +71,6 @@ Supporting utilities:
 ## Honest limitations
 
 - This public repo is a sanitized prototype-oriented portfolio copy, not the full original product.
-- The local feedback store is intentionally simple and session-scoped through a frontend header.
+- Feedback persistence is session-scoped through a frontend header and stored in a Postgres-compatible database.
 - The frontend has no auth in this public version.
 - The backend currently has no automated tests in this repo.

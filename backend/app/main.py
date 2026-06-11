@@ -8,28 +8,21 @@ import csv
 import io
 import os
 import re
-import sqlite3
-from datetime import datetime
-from io import BytesIO
-from pathlib import Path
 from typing import Final, Literal
 
-import pytesseract
 import requests
 from fastapi import FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, Response
 from openai import OpenAI
-from PIL import Image
 from pydantic import BaseModel, Field
 
 from app.api_emails import router as emails_router
+from app import db as feedback_db
 from app.utils import critique_allowed
 from app.utils_pdf import extract_text_from_pdf
 
-APP_DIR = Path(__file__).resolve().parent
-DB_PATH = APP_DIR / "feedbacks.db"
-MAX_UPLOAD_SIZE: Final = 15_000_000
+MAX_UPLOAD_SIZE: Final = 4_000_000
 
 LANGUAGE_NAMES = {
     "AR": "Arabic",
@@ -77,15 +70,29 @@ DEEPL_API_URL = os.getenv("DEEPL_API_URL", "https://api-free.deepl.com/v2/transl
 
 app = FastAPI(title="LexAi Portfolio API")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
+
+def allowed_origins() -> list[str]:
+    origins = {
         "http://127.0.0.1:5500",
         "http://localhost:5500",
         "http://127.0.0.1:8000",
         "http://localhost:8000",
-        "null",
-    ],
+    }
+
+    single = os.getenv("FRONTEND_ORIGIN", "").strip()
+    if single:
+        origins.add(single)
+
+    raw = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    for item in raw.split(","):
+        value = item.strip()
+        if value:
+            origins.add(value)
+    return sorted(origins)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -138,29 +145,6 @@ def chosen_model(value: str | None) -> str:
     if model not in ALLOWED_MODELS:
         raise HTTPException(400, f"Model not allowed: {model}")
     return model
-
-
-def db() -> sqlite3.Connection:
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    return con
-
-
-def init_db() -> None:
-    with db() as con:
-        con.execute(
-            """
-            CREATE TABLE IF NOT EXISTS feedbacks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id TEXT NOT NULL,
-                original_prompt TEXT NOT NULL,
-                translated_text TEXT NOT NULL,
-                target_language TEXT NOT NULL,
-                feedback TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            )
-            """
-        )
 
 
 def language_name(code: str) -> str:
@@ -278,27 +262,22 @@ def translate_text(text: str, target_language: str, model: str) -> str:
 
 
 def save_feedback_row(session_id: str, original_prompt: str, translated_text: str, target_language: str, feedback: str) -> None:
-    with db() as con:
-        con.execute(
-            """
-            INSERT INTO feedbacks (
-                session_id, original_prompt, translated_text, target_language, feedback, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                session_id,
-                original_prompt,
-                translated_text,
-                target_language.upper(),
-                feedback,
-                datetime.utcnow().isoformat(timespec="seconds") + "Z",
-            ),
+    try:
+        feedback_db.insert_feedback(
+            session_id,
+            original_prompt,
+            translated_text,
+            target_language.upper(),
+            feedback,
         )
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc)) from exc
 
 
 @app.on_event("startup")
 def startup() -> None:
-    init_db()
+    if feedback_db.is_configured():
+        feedback_db.ensure_schema()
 
 
 @app.get("/")
@@ -313,7 +292,16 @@ def ping() -> dict[str, str]:
 
 @app.get("/healthz")
 def healthz() -> dict[str, bool]:
-    return {"ok": True}
+    try:
+        db_ok = feedback_db.ping() if feedback_db.is_configured() else False
+    except Exception:
+        db_ok = False
+    return {"ok": True, "database_configured": feedback_db.is_configured(), "database_ok": db_ok}
+
+
+@app.get("/health")
+def health() -> dict[str, bool]:
+    return healthz()
 
 
 @app.post("/full-process/")
@@ -363,16 +351,10 @@ def variant_feedback(req: VariantFeedbackRequest, session_id: str = Header(..., 
 
 @app.get("/feedbacks/")
 def feedbacks(session_id: str = Header(..., alias="X-Lex-Session")) -> list[dict[str, str]]:
-    with db() as con:
-        rows = con.execute(
-            """
-            SELECT original_prompt, translated_text, target_language, feedback, created_at
-            FROM feedbacks
-            WHERE session_id = ?
-            ORDER BY id DESC
-            """,
-            (session_id,),
-        ).fetchall()
+    try:
+        rows = feedback_db.list_feedbacks(session_id)
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc)) from exc
     return [
         {
             "original_prompt": row["original_prompt"],
@@ -387,23 +369,19 @@ def feedbacks(session_id: str = Header(..., alias="X-Lex-Session")) -> list[dict
 
 @app.delete("/feedbacks/clear")
 def clear_feedbacks(session_id: str = Header(..., alias="X-Lex-Session")) -> dict[str, int]:
-    with db() as con:
-        cursor = con.execute("DELETE FROM feedbacks WHERE session_id = ?", (session_id,))
-    return {"deleted": cursor.rowcount}
+    try:
+        deleted = feedback_db.clear_feedbacks(session_id)
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    return {"deleted": deleted}
 
 
 @app.get("/feedbacks/download")
 def download_feedbacks(session_id: str = Header(..., alias="X-Lex-Session")) -> Response:
-    with db() as con:
-        rows = con.execute(
-            """
-            SELECT original_prompt, translated_text, target_language, feedback, created_at
-            FROM feedbacks
-            WHERE session_id = ?
-            ORDER BY id DESC
-            """,
-            (session_id,),
-        ).fetchall()
+    try:
+        rows = feedback_db.list_feedbacks(session_id)
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc)) from exc
     if not rows:
         raise HTTPException(404, "No feedback rows available")
 
@@ -432,17 +410,19 @@ def download_feedbacks(session_id: str = Header(..., alias="X-Lex-Session")) -> 
 async def upload_pdf(file: UploadFile = File(...)) -> dict[str, str]:
     pdf_bytes = await file.read()
     if len(pdf_bytes) > MAX_UPLOAD_SIZE:
-        raise HTTPException(413, "PDF exceeds 15 MB limit")
-    return {"extracted_text": extract_text_from_pdf(pdf_bytes)}
+        raise HTTPException(413, "PDF exceeds the Phase 1 Vercel upload limit of 4 MB.")
+    try:
+        return {"extracted_text": extract_text_from_pdf(pdf_bytes)}
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)) -> dict[str, str]:
-    if file.content_type not in {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/bmp", "image/tiff"}:
-        raise HTTPException(400, "Unsupported image format")
-    image = Image.open(BytesIO(await file.read()))
-    text = pytesseract.image_to_string(image).strip()
-    return {"extracted_text": text}
+    raise HTTPException(
+        501,
+        "Image OCR is not available in the Phase 1 Vercel deployment. Add external OCR or vision integration to support this route."
+    )
 
 
 @app.post("/feedback/regenerate")

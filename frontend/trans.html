@@ -238,6 +238,15 @@
       text-transform:uppercase;
       letter-spacing:.05em;
     }
+    .health{
+      margin-top:14px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#f8fafc;
+      color:var(--muted);
+      font-size:.92rem;
+    }
   </style>
 </head>
 <body>
@@ -254,6 +263,12 @@
     <section class="hero">
       <span class="pill">Translation Workflow</span>
       <h1>Multilingual content demo</h1>
+      <p>
+        This live public version runs against a real FastAPI backend. Translation, rewriting, variants,
+        feedback, regeneration, CSV export, and email generation remain real. OCR is intentionally limited
+        to Vercel-safe behavior in Phase 1.
+      </p>
+      <div class="health" id="backendHealth">Checking backend connection…</div>
     </section>
 
     <section class="layout">
@@ -315,7 +330,7 @@
 
         <label for="fileInput">Optional OCR input</label>
         <input id="fileInput" type="file" accept=".pdf,image/*">
-        <p class="hint">Upload a PDF or image to extract text into the source box before running the workflow.</p>
+        <p class="hint">Text-based PDFs under 4 MB are supported in Phase 1. Image OCR and scanned-PDF OCR are not enabled in this Vercel deployment yet.</p>
 
         <div class="actions">
           <button class="primary" id="runBtn" type="button">Run Workflow</button>
@@ -346,7 +361,7 @@
       <div class="card">
         <h2>Saved Feedback</h2>
         <p class="hint">
-          Feedback is stored locally in the backend SQLite file for demo purposes only. Export uses CSV.
+          Feedback is stored in the deployed Postgres-compatible database for this demo session. Export uses CSV.
         </p>
         <div class="toolbar">
           <button class="secondary" id="refreshBtn" type="button">Refresh</button>
@@ -373,6 +388,7 @@
       </div>
     </section>
   </main>
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

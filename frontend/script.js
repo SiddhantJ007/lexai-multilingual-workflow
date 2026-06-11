@@ -4,7 +4,7 @@ const API_BASE = (() => {
   if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     return "http://127.0.0.1:8000";
   }
-  return `${location.protocol}//${location.hostname}:8000`;
+  return "";
 })();
 
 const SESSION_KEY = "lexai_public_session";
@@ -34,7 +34,8 @@ const nodes = {
   feedbackControls: document.getElementById("feedbackControls"),
   variantsSection: document.getElementById("variantsSection"),
   variantList: document.getElementById("variantList"),
-  feedbackBody: document.getElementById("feedbackBody")
+  feedbackBody: document.getElementById("feedbackBody"),
+  backendHealth: document.getElementById("backendHealth")
 };
 
 function setStatus(el, msg, isError = false) {
@@ -47,6 +48,9 @@ function activeMode() {
 }
 
 function api(path, options = {}) {
+  if (!API_BASE) {
+    throw new Error("Backend URL is not configured. Set window.LEXAI_API_BASE in frontend/config.js.");
+  }
   const headers = new Headers(options.headers || {});
   headers.set("X-Lex-Session", sessionId);
   return fetch(`${API_BASE}${path}`, { ...options, headers });
@@ -121,6 +125,28 @@ async function loadFeedbacks() {
   } catch (error) {
     renderFeedbackRows([]);
     setStatus(nodes.tableStatus, `Could not load feedback history: ${error.message}`, true);
+  }
+}
+
+async function checkBackendHealth() {
+  if (!nodes.backendHealth) return;
+  if (!API_BASE) {
+    nodes.backendHealth.textContent = "Backend URL not configured. Set frontend/config.js before deploying the static frontend.";
+    nodes.backendHealth.style.color = "#c84c31";
+    return;
+  }
+
+  nodes.backendHealth.textContent = "Checking backend connection…";
+  try {
+    const response = await fetch(`${API_BASE}/healthz`, { headers: { Accept: "application/json" } });
+    const payload = await parseJson(response);
+    if (!response.ok) throw new Error(payload.detail || "Health check failed");
+    const dbState = payload.database_ok ? "database connected" : (payload.database_configured ? "database unavailable" : "database not configured");
+    nodes.backendHealth.textContent = `Backend connected. ${dbState}.`;
+    nodes.backendHealth.style.color = payload.database_ok ? "#2d8f5a" : "#5e6a76";
+  } catch (error) {
+    nodes.backendHealth.textContent = `Backend unavailable: ${error.message}`;
+    nodes.backendHealth.style.color = "#c84c31";
   }
 }
 
@@ -381,4 +407,5 @@ document.querySelectorAll('input[name="mode"]').forEach((radio) => {
 });
 
 syncModeUi();
+checkBackendHealth();
 loadFeedbacks();

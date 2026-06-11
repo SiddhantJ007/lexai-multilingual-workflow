@@ -1,0 +1,1 @@
+window.LEXAI_API_BASE = "https://your-backend-project.vercel.app";
