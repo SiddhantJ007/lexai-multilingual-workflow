@@ -42,3 +42,6 @@ Thumbs.db
 .ruff_cache/
 
 nohup.out
+
+lexai-backend
+lexai-frontend-vercel
