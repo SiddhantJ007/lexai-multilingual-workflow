@@ -24,11 +24,11 @@ jobs:
 
       - name: Lint backend
         run: |
-          ruff check lexai-backend
+          ruff check backend
 
       - name: Run backend tests
         run: |
-          pytest lexai-backend/tests
+          pytest backend/tests
 
       - name: Frontend smoke check
         run: |
