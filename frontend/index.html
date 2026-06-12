@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LexAi | AI Multilingual Workflow</title>
+  <style>
+    :root{
+      --bg:#f4efe6;
+      --ink:#132029;
+      --muted:#5e6a6f;
+      --panel:#fffdf9;
+      --line:#d9d2c4;
+      --accent:#0f8b8d;
+      --accent-2:#ef8354;
+      --shadow:0 20px 50px rgba(19,32,41,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font:16px/1.6 Georgia, "Times New Roman", serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(239,131,84,.18), transparent 32%),
+        linear-gradient(180deg, #f7f2ea 0%, var(--bg) 100%);
+    }
+    a{color:inherit}
+    .shell{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+    .hero{
+      background:rgba(255,253,249,.9);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:40px 28px;
+      box-shadow:var(--shadow);
+    }
+    .eyebrow{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:999px;
+      background:#efe8d9;
+      color:var(--accent);
+      font:600 12px/1.2 system-ui, sans-serif;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    h1{
+      margin:18px 0 14px;
+      font-size:clamp(2.3rem, 6vw, 4.6rem);
+      line-height:1;
+      letter-spacing:-.04em;
+    }
+    .lede{
+      max-width:700px;
+      margin:0;
+      color:var(--muted);
+      font:500 1.08rem/1.7 system-ui, sans-serif;
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      margin-top:28px;
+    }
+    .button{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:220px;
+      padding:14px 18px;
+      border-radius:999px;
+      border:1px solid var(--ink);
+      text-decoration:none;
+      font:700 .96rem/1.2 system-ui, sans-serif;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .button:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 24px rgba(19,32,41,.08);
+    }
+    .button.primary{
+      background:var(--ink);
+      color:#fffdf9;
+      border-color:var(--ink);
+    }
+    .button.secondary{
+      background:transparent;
+      color:var(--ink);
+    }
+    .grid{
+      display:grid;
+      gap:18px;
+      margin-top:26px;
+    }
+    @media(min-width:860px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+    }
+    .card{
+      background:rgba(255,253,249,.92);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:1.15rem;
+      font-family:system-ui, sans-serif;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      font:500 .95rem/1.7 system-ui, sans-serif;
+    }
+    .footer-note{
+      margin-top:22px;
+      color:var(--muted);
+      font:500 .9rem/1.6 system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <span class="eyebrow">Portfolio Demo</span>
+      <h1>LexAi</h1>
+      <p class="lede">
+        A sanitized proof-of-concept for an AI-assisted multilingual content workflow.
+        This public version focuses on translation, OCR-assisted text intake, iterative rewriting,
+        alternative outputs, and exportable feedback history.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="trans.html">Open Translation Workflow</a>
+        <a class="button secondary" href="emails-demo.html">Open Email Drafting Demo</a>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Project summary">
+      <article class="card">
+        <h2>Workflow Scope</h2>
+        <p>
+          Paste or upload source content, translate or rephrase it, review regenerated options,
+          capture feedback, and export the results.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Public Repo Focus</h2>
+        <p>
+          The original business website, authentication flows, marketing pages, private branding,
+          and deployment details were intentionally removed from this portfolio copy.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Tech Direction</h2>
+        <p>
+          Static frontend plus FastAPI backend, OpenAI-driven text generation, optional DeepL-based
+          translation, and OCR extraction for PDFs and images.
+        </p>
+      </article>
+    </section>
+
+    <p class="footer-note">
+      Sanitized live demo. Private keys, client data, and original deployment details have been removed.
+    </p>
+  </main>
+</body>
+</html>
