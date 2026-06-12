@@ -8,6 +8,11 @@ LexAi is a sanitized public portfolio project that demonstrates a real AI-assist
 
 No fake or mock API responses are used in the supported public flows.
 
+## Live Demo
+
+- Frontend demo: `https://lexai-frontend-vercel.vercel.app`
+- Backend health check: `https://lexai-backend-vercel.vercel.app/healthz`
+
 ## Project Evolution
 
 LexAi started as a multilingual AI content workflow built around a real product need: helping users generate, translate, refine, and export content without manually moving between multiple tools. The early version included login and signup flows so user activity and usage could be tracked through accounts.
