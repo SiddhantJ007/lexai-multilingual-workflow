@@ -1,8 +1,12 @@
+import os
+
 from dotenv import load_dotenv
+from openai import OpenAI
+
 load_dotenv()
 
-from openai import OpenAI
-client = OpenAI()  # picks up OPENAI_API_KEY
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "test-key"))
+
 
 def critique_allowed(text: str) -> bool:
     """

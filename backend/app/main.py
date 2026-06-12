@@ -19,10 +19,10 @@ from openai import OpenAI
 from openpyxl import Workbook
 from pydantic import BaseModel, Field
 
-from app.api_emails import router as emails_router
-from app import db as feedback_db
-from app.utils import critique_allowed
-from app.utils_pdf import extract_text_from_pdf
+from .api_emails import router as emails_router
+from . import db as feedback_db
+from .utils import critique_allowed
+from .utils_pdf import extract_text_from_pdf
 
 MAX_UPLOAD_SIZE: Final = 4_000_000
 ANON_QUOTA_DAY: Final = int(os.getenv("ANON_QUOTA_DAY", "10000"))
@@ -68,7 +68,7 @@ ALLOWED_MODELS = {
     if model.strip()
 }
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "test-key"))
 DEEPL_API_KEY = os.getenv("DEEPL_API_KEY", "").strip()
 DEEPL_API_URL = os.getenv("DEEPL_API_URL", "https://api-free.deepl.com/v2/translate").strip()
 

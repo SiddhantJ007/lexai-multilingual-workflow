@@ -1,14 +1,19 @@
+from __future__ import annotations
+
+import json
+import os
+import re
+from typing import Dict, List, Literal, Optional
+
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional, Literal, Dict
 from openai import OpenAI
-import os, json, re
+from pydantic import BaseModel
 
 # ---------- Router ----------
 router = APIRouter(prefix="/api", tags=["emails"])
 
 # ---------- OpenAI client ----------
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "test-key"))
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 ALLOWED_MODELS = {
     model.strip()
@@ -19,18 +24,20 @@ ALLOWED_MODELS = {
 # ---------- Types & Models ----------
 MethodName = Literal["AIDA", "PAS", "4U", "STAR", "IDCA"]
 
+
 class GenerateRequest(BaseModel):
     industry: str
     persona: str
     offer: str
     value_prop: str
     market_state: str
-    cta_type: Literal["buy","book"]
+    cta_type: Literal["buy", "book"]
     cta_target: str  # allow http(s), tel:, mailto:
-    tone: Optional[Literal["neutral","friendly","formal","bold"]] = "neutral"
+    tone: Optional[Literal["neutral", "friendly", "formal", "bold"]] = "neutral"
     differentiators: Optional[List[str]] = []
     competitors: Optional[List[str]] = []
     only_method: Optional[MethodName] = None  # for per-method regenerate
+
 
 class Email(BaseModel):
     method: MethodName
@@ -56,10 +63,10 @@ def _user_prompt(payload: GenerateRequest, restrict: Optional[MethodName]) -> st
         "inputs": payload.model_dump(),
         "requirements": {
             "length_words": [50, 125],
-            "methods": [restrict] if restrict else ["AIDA","PAS","4U","STAR","IDCA"],
+            "methods": [restrict] if restrict else ["AIDA", "PAS", "4U", "STAR", "IDCA"],
             "cta_rule": f"Use '{payload.cta_type}' and target '{payload.cta_target}'.",
             "tone": payload.tone,
-            "skim_friendly": True
+            "skim_friendly": True,
         },
         "output_schema": {
             "emails": [
@@ -71,7 +78,7 @@ def _user_prompt(payload: GenerateRequest, restrict: Optional[MethodName]) -> st
                     "cta_target": payload.cta_target
                 }
             ]
-        }
+        },
     }
     return json.dumps(spec, ensure_ascii=False)
 
@@ -79,25 +86,27 @@ def _user_prompt(payload: GenerateRequest, restrict: Optional[MethodName]) -> st
 def selected_model() -> str:
     return DEFAULT_MODEL if DEFAULT_MODEL in ALLOWED_MODELS else sorted(ALLOWED_MODELS)[0]
 
+
 def _call_llm(payload: GenerateRequest, restrict: Optional[MethodName]) -> Dict:
     resp = client.chat.completions.create(
         model=selected_model(),
         temperature=0.7,
         response_format={"type": "json_object"},
         messages=[
-            {"role":"system", "content": SYSTEM},
-            {"role":"user",   "content": _user_prompt(payload, restrict)}
-        ]
+            {"role": "system", "content": SYSTEM},
+            {"role": "user", "content": _user_prompt(payload, restrict)},
+        ],
     )
     text = resp.choices[0].message.content
     try:
         return json.loads(text)
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=502, detail=f"LLM did not return JSON: {e}")
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=502, detail=f"LLM did not return JSON: {exc}") from exc
 
 # ---------- Validation helpers ----------
 def _word_count(s: str) -> int:
     return len(re.findall(r"\b\w[\w'-]*\b", s))
+
 
 def _ensure_linebreaks(s: str) -> str:
     if s.count("\n") >= 2:
@@ -107,12 +116,16 @@ def _ensure_linebreaks(s: str) -> str:
     for w in words:
         chunk.append(w)
         if len(chunk) >= cap:
-            lines.append(" ".join(chunk)); chunk = []
-    if chunk: lines.append(" ".join(chunk))
+            lines.append(" ".join(chunk))
+            chunk = []
+    if chunk:
+        lines.append(" ".join(chunk))
     return "\n".join(lines)
+
 
 def _normalize_cta_label(cta_type: str) -> str:
     return "Buy now" if cta_type == "buy" else "Book a 20-min call"
+
 
 def _validate_and_fix(payload: GenerateRequest, data: Dict, restrict: Optional[MethodName]) -> GenerateResponse:
     expect = [restrict] if restrict else ["AIDA","PAS","4U","STAR","IDCA"]
@@ -155,9 +168,12 @@ def _validate_and_fix(payload: GenerateRequest, data: Dict, restrict: Optional[M
                 model=selected_model(),
                 temperature=0.3,
                 messages=[
-                    {"role":"system","content":"Rewrite to 50–125 words, keep meaning & CTA intact, add concise line breaks. Return only the email body text."},
-                    {"role":"user","content": body}
-                ]
+                    {
+                        "role": "system",
+                        "content": "Rewrite to 50–125 words, keep meaning & CTA intact, add concise line breaks. Return only the email body text.",
+                    },
+                    {"role": "user", "content": body},
+                ],
             )
             try:
                 body = _ensure_linebreaks(fix.choices[0].message.content.strip())
@@ -166,10 +182,15 @@ def _validate_and_fix(payload: GenerateRequest, data: Dict, restrict: Optional[M
 
         wc[method] = _word_count(body)
 
-        out_emails.append(Email(
-            method=method, title=title, body=body,
-            cta_label=cta_label, cta_target=cta_target
-        ))
+        out_emails.append(
+            Email(
+                method=method,
+                title=title,
+                body=body,
+                cta_label=cta_label,
+                cta_target=cta_target,
+            )
+        )
 
     return GenerateResponse(emails=out_emails, meta={"word_counts": wc})
 
