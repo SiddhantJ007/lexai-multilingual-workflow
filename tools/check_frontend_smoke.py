@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-FRONTEND = ROOT / "lexai-frontend-vercel"
+FRONTEND = ROOT / "frontend"
 
 
 def must_exist(path: Path) -> None:
