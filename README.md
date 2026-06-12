@@ -23,6 +23,14 @@ The translation workflow also evolved through feedback. A “good” response co
 
 This public version keeps the core workflow and removes private branding, deployment details, credentials, and third-party business context. It is intended to show the product and engineering decisions behind the prototype: simplifying user access, preserving session isolation, building feedback loops, supporting OCR/file input, and making AI outputs easier to review and export.
 
+## In Plain English
+
+LexAi solves a fairly common workflow problem: translating and refining short-form content usually means bouncing between multiple tools, losing context, and manually tracking which version was actually better. This project brings that loop into one place.
+
+The user is someone who needs to generate or improve multilingual copy quickly, review alternatives, give feedback on weak results, and keep a usable record of what worked. In practice that could be a marketer, founder, operator, or anyone working on product or promotional text.
+
+The app takes source text, improves it in English when needed, translates it, lets the user rate the result, generates alternatives after a good result, and runs a critique-and-regenerate loop after a bad result. It also keeps session-scoped history so those results can be reviewed and exported later.
+
 ## Key features
 ## Supported In The Public Demo
 
@@ -51,6 +59,14 @@ This keeps the deployment real while avoiding unsupported native OCR assumptions
 - AI providers:
   - OpenAI for rewrite, translation fallback, regeneration, variants, and email generation
   - DeepL for translation when configured
+
+## Testing
+
+A lightweight testing and CI setup is included so the project is not treated as “push and hope.”
+
+- Testing notes: [`docs/TESTING.md`](docs/TESTING.md)
+- Deployment notes: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+- Security and privacy notes: [`SECURITY.md`](SECURITY.md)
 
 ## What Was Removed Or Sanitized
 
