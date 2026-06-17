@@ -10,8 +10,8 @@ No fake or mock API responses are used in the supported public flows.
 
 ## Live Demo
 
-- Frontend demo: `https://lexai-frontend-vercel.vercel.app`
-- Backend health check: `https://lexai-backend-vercel.vercel.app/healthz`
+- Frontend demo: https://lexai-frontend-vercel.vercel.app
+- Backend health check: https://lexai-backend-vercel.vercel.app/healthz
 
 <a href="https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90">
   <img src="docs/assets/lexai/loom.png" alt="Watch the LexAi demo walkthrough on Loom" width="520">
