@@ -36,7 +36,9 @@ The screenshots below are intentionally limited to the cleaner public-facing sta
     <td width="50%">
       <img src="assets/lexai/emails-tool.png" alt="LexAi email drafting demo interface" width="100%">
     </td>
-    <td width="50%"></td>
+    <td width="50%">
+      <img src="assets/lexai/alternatives.png" alt="LexAi alternative output generation and rating flow" width="100%">
+    </td>
   </tr>
 </table>
 

@@ -36,7 +36,9 @@ No fake or mock API responses are used in the supported public flows.
     <td width="50%">
       <img src="docs/assets/lexai/emails-tool.png" alt="LexAi email drafting demo" width="100%">
     </td>
-    <td width="50%"></td>
+    <td width="50%">
+      <img src="docs/assets/lexai/alternatives.png" alt="LexAi alternative output generation and rating flow" width="100%">
+    </td>
   </tr>
 </table>
 
