@@ -7,7 +7,9 @@ This page collects the public demo assets for LexAi in one place: the live links
 - Live frontend: `https://lexai-frontend-vercel.vercel.app`
 - Backend health check: `https://lexai-backend-vercel.vercel.app/healthz`
 
-[![Watch the LexAi walkthrough](assets/lexai/index-page.png)](https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90)
+<a href="https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90">
+  <img src="assets/lexai/loom.png" alt="Watch the LexAi walkthrough on Loom" width="520">
+</a>
 
 ## What The Walkthrough Covers
 
@@ -24,19 +26,17 @@ The screenshots below are intentionally limited to the cleaner public-facing sta
 <table>
   <tr>
     <td width="50%">
-      <img src="assets/lexai/index-page.png" alt="LexAi public landing page" width="100%">
+      <img src="assets/lexai/translation.png" alt="LexAi translation workflow interface" width="100%">
     </td>
     <td width="50%">
-      <img src="assets/lexai/translation.png" alt="LexAi translation workflow interface" width="100%">
+      <img src="assets/lexai/regeneration.png" alt="LexAi critique prompt before regeneration" width="100%">
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="assets/lexai/regeneration.png" alt="LexAi critique prompt before regeneration" width="100%">
-    </td>
-    <td width="50%">
       <img src="assets/lexai/emails-tool.png" alt="LexAi email drafting demo interface" width="100%">
     </td>
+    <td width="50%"></td>
   </tr>
 </table>
 

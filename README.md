@@ -13,7 +13,9 @@ No fake or mock API responses are used in the supported public flows.
 - Frontend demo: `https://lexai-frontend-vercel.vercel.app`
 - Backend health check: `https://lexai-backend-vercel.vercel.app/healthz`
 
-[![LexAi demo walkthrough preview](docs/assets/lexai/index-page.png)](https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90)
+<a href="https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90">
+  <img src="docs/assets/lexai/loom.png" alt="Watch the LexAi demo walkthrough on Loom" width="520">
+</a>
 
 ## Demo Walkthrough
 
@@ -24,19 +26,17 @@ No fake or mock API responses are used in the supported public flows.
 <table>
   <tr>
     <td width="50%">
-      <img src="docs/assets/lexai/index-page.png" alt="LexAi landing page" width="100%">
+      <img src="docs/assets/lexai/translation.png" alt="LexAi translation workflow page" width="100%">
     </td>
     <td width="50%">
-      <img src="docs/assets/lexai/translation.png" alt="LexAi translation workflow page" width="100%">
+      <img src="docs/assets/lexai/regeneration.png" alt="LexAi critique and regenerate prompt flow" width="100%">
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="docs/assets/lexai/regeneration.png" alt="LexAi critique and regenerate prompt flow" width="100%">
-    </td>
-    <td width="50%">
       <img src="docs/assets/lexai/emails-tool.png" alt="LexAi email drafting demo" width="100%">
     </td>
+    <td width="50%"></td>
   </tr>
 </table>
 
