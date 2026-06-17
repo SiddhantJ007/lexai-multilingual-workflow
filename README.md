@@ -13,6 +13,33 @@ No fake or mock API responses are used in the supported public flows.
 - Frontend demo: `https://lexai-frontend-vercel.vercel.app`
 - Backend health check: `https://lexai-backend-vercel.vercel.app/healthz`
 
+[![LexAi demo walkthrough preview](docs/assets/lexai/index-page.png)](https://www.loom.com/share/db24befd8f5b426d859e3fad80348a90)
+
+## Demo Walkthrough
+
+- Full walkthrough notes: [`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md)
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/assets/lexai/index-page.png" alt="LexAi landing page" width="100%">
+    </td>
+    <td width="50%">
+      <img src="docs/assets/lexai/translation.png" alt="LexAi translation workflow page" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/assets/lexai/regeneration.png" alt="LexAi critique and regenerate prompt flow" width="100%">
+    </td>
+    <td width="50%">
+      <img src="docs/assets/lexai/emails-tool.png" alt="LexAi email drafting demo" width="100%">
+    </td>
+  </tr>
+</table>
+
 ## Project Evolution
 
 LexAi started as a multilingual AI content workflow built around a real product need: helping users generate, translate, refine, and export content without manually moving between multiple tools. The early version included login and signup flows so user activity and usage could be tracked through accounts.
